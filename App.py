@@ -96,11 +96,11 @@ class App:
 
     def start_draw(self):
         self.screen.fill(BLACK)
-        self.draw_text('Pacman', self.screen, [
+        self.draw_text('PacMan', self.screen, [
                        WIDTH//2, HEIGHT//2-50], START_TEXT_SIZE, RED, START_FONT, centered=True)
-        self.draw_text('Press space to play', self.screen, [
+        self.draw_text('Натисніть пробіл щоб почати гру', self.screen, [
                        WIDTH//2, HEIGHT//2], START_TEXT_SIZE, RED, START_FONT, centered=True)
-        self.draw_text(f'HIGH SCORE {self.high_score}', self.screen, [4, 0],
+        self.draw_text(f'Рекорд: {self.high_score}', self.screen, [4, 0],
                        START_TEXT_SIZE, WHITE, START_FONT)
         pygame.display.update()
 
