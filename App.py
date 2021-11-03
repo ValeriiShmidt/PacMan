@@ -1,13 +1,15 @@
-import sys
 from PacMan import *
 from Enemy import *
 from GenMap import *
+from Statistics import *
 pygame.init()
+
 vec = pygame.math.Vector2
+
 
 class App:
     def __init__(self):
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.HWSURFACE | pygame.DOUBLEBUF)
         self.background = None
         self.clock = pygame.time.Clock()
         self.running = True
@@ -19,12 +21,13 @@ class App:
         self.teleports = []
         self.enemies = []
         self.e_pos = []
-        self.p_pos = START
+        self.p_pos = (1, 1)
         self.map_generator = GenMap()
         self.grid_map = None
-        self.gen_map()
-        self.player = PacMan(self, vec(self.p_pos))
+        self.load_map()
+        self.player = Player(self, vec(self.p_pos))
         self.high_score = self.load_score()
+        self.start_time = time.time()
 
     def start_game(self):
         while self.running:
@@ -50,6 +53,7 @@ class App:
     def load_score(self):
         with open("Record.txt", "r") as file:
             score = int(file.read())
+            print(score)
         return score
 
     def write_score(self, score):
@@ -65,29 +69,49 @@ class App:
             pos[1] = pos[1]-text_size[1]//2
         screen.blit(text, pos)
 
-    def gen_map(self):
+    def load_map(self):
         self.background = pygame.image.load('BG.png')
         self.background = pygame.transform.scale(self.background, (MAZE_WIDTH, MAZE_HEIGHT))
-        self.grid_map = self.map_generator.generate_map_by_kruskal(ROWS, COLS)
+        self.grid_map = self.map_generator.create_labyrinth(ROWS, COLS)
         for y_index in range(ROWS):
             for x_index in range(COLS):
                 if self.grid_map[y_index, x_index] == WALL:
                     self.walls.append(vec(x_index, y_index))
                 elif self.grid_map[y_index, x_index] == COIN:
                     self.coins.append(vec(x_index, y_index))
+                elif self.grid_map[y_index, x_index] == DEFAULT_GHOST:
+                    self.enemies.append(Enemy(self, vec(x_index, y_index), DEFAULT))
+                elif self.grid_map[y_index, x_index] == RANDOM_GHOST:
+                    self.enemies.append(Enemy(self, vec(x_index, y_index), RANDOM))
+
+
+    def draw_grid(self):
+
+        for x in range(WIDTH//self.cell_width):
+            pygame.draw.line(self.background, GREY, (x*self.cell_width, 0),
+                             (x*self.cell_width, HEIGHT))
+        for x in range(HEIGHT//self.cell_height):
+            pygame.draw.line(self.background, GREY, (0, x*self.cell_height),
+                             (WIDTH, x*self.cell_height))
 
     def reset(self):
         self.walls = []
         self.player.lives = PLAYER_LIVES
         self.player.current_score = 0
         self.player.grid_pos = vec((1, 1))
-        self.player.pix_pos = self.player.get_pixel_position()
+        self.player.pix_pos = self.player.get_pix_pos()
         self.player.direction *= 0
-        self.gen_map()
-        self.player.path = self.player.collect_all_coins()
+        for enemy in self.enemies:
+            enemy.grid_pos = vec(enemy.position)
+            enemy.pix_pos = enemy.get_pix_pos()
+        self.load_map()
         self.state = GAMING
 
     def start_events(self):
+        """
+        Method control the inputs. Press SCAPE to start play. ESC for exit
+        :return:
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -95,16 +119,26 @@ class App:
                 self.state = GAMING
 
     def start_draw(self):
+        """
+        Drawing the main menu.
+        :return:
+        """
         self.screen.fill(BLACK)
-        self.draw_text('PacMan', self.screen, [
+        self.draw_text('Pacman', self.screen, [
                        WIDTH//2, HEIGHT//2-50], START_TEXT_SIZE, RED, START_FONT, centered=True)
-        self.draw_text('Натисніть пробіл щоб почати гру', self.screen, [
+        self.draw_text('Press space to play', self.screen, [
                        WIDTH//2, HEIGHT//2], START_TEXT_SIZE, RED, START_FONT, centered=True)
-        self.draw_text(f'Рекорд: {self.high_score}', self.screen, [4, 0],
+        self.draw_text(f'HIGH SCORE {self.high_score}', self.screen, [4, 0],
                        START_TEXT_SIZE, WHITE, START_FONT)
         pygame.display.update()
 
+# This is the main block of code controls game process and gameplay
+
     def playing_events(self):
+        """
+        This method allows you to control in game player.
+        :return:
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -119,59 +153,107 @@ class App:
                     self.player.change_direction(vec(0, 1))
 
     def playing_update(self):
+        """
+        Updating the player and check is he winner. If he is game turn to winner state.
+        :return:
+        """
         if len(self.coins) == 0:
+            play_time = time.time() - self.start_time
+            with open("results.csv", "a") as file:
+                file.write(f"{self.player.algo},{self.player.current_score},{play_time},win\n")
+
             self.state = WINNER
         self.player.update()
 
     def playing_draw(self):
-
+        """
+        This method draw main game scenes and update it.
+        :return:
+        """
         self.screen.fill(BLACK)
-        self.screen.blit(self.background, (BORDER // 2, BORDER // 2))
-        self.draw_walls()
-        self.draw_text(f'ПОТОЧНІ БАЛИ: {self.player.current_score}',
-                       self.screen, [60, 0], 36, WHITE, START_FONT)
-        self.draw_text(f'РЕКОРД: {self.high_score}', self.screen, [WIDTH//2+60, 0], 36, WHITE, START_FONT)
-        self.player.draw()
-        self.player.draw_path()
+        self.screen.blit(self.background, (PADDING // 2, PADDING // 2))
         self.draw_coins()
+        self.draw_walls()
+        self.draw_text(f'CURRENT SCORE: {self.player.current_score}',
+                       self.screen, [60, 0], 36, WHITE, START_FONT)
+        self.draw_text(f'HIGH SCORE: {self.high_score}', self.screen, [WIDTH//2+60, 0], 36, WHITE, START_FONT)
+        self.player.draw()
+        for enemy in self.enemies:
+            enemy.update()
+            enemy.draw()
         pygame.display.update()
 
-
     def remove_life(self):
+        """
+        This method control Player's lives and control moment of lose.
+        :return:
+        """
         self.player.lives -= 1
 
         if self.player.lives == 0:
+            with open("results.csv", "a") as file:
+                play_time = time.time() - self.start_time
+                file.write(f"{self.player.algo},{self.player.current_score},{play_time},lose\n")
             if self.player.current_score > self.high_score:
                 self.high_score = self.player.current_score
             self.write_score(self.player.current_score)
             self.state = GAME_OVER
         else:
             self.player.grid_pos = vec(self.player.starting_pos)
-            self.player.pix_pos = self.player.get_pixel_position()
+            self.player.pix_pos = self.player.get_pix_pos()
             self.player.direction *= 0
             for enemy in self.enemies:
                 enemy.grid_pos = vec(enemy.position)
-                enemy.pix_pos = enemy.get_pixel_position()
+                enemy.pix_pos = enemy.get_pix_pos()
 
     def draw_coins(self):
+        """
+        Simple draw coins method.
+        :return:
+        """
         for coin in self.coins:
-            pygame.draw.circle(self.screen, YELLOW,
-                               (int(coin.x*self.cell_width) + self.cell_width // 2 + BORDER // 2,
-                                int(coin.y*self.cell_height) + self.cell_height // 2 + BORDER // 2), 6)
+            if self.player.target_coin is not None and coin[1] == self.player.target_coin[0] and coin[0] == self.player.target_coin[1]:
+                pygame.draw.circle(self.screen, RED,
+                                   (int(coin.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                    int(coin.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 5)
+            else:
+
+                pygame.draw.circle(self.screen, YELLOW,
+                                   (int(coin.x * self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                    int(coin.y * self.cell_height) + self.cell_height // 2 + PADDING // 2), 5)
 
     def draw_walls(self):
         maze = self.grid_map
         h = maze.shape[0]
         w = maze.shape[1]
-        for x in range(w):
-            for y in range(h):
+        for x in range(h):
+            for y in range(w):
                 if maze[x, y] == WALL:
-                    pygame.draw.rect(self.screen, BLUE, (y * self.cell_width + BORDER // 2,
-                                                         x * self.cell_height + BORDER // 2,
-                                                         self.cell_width, self.cell_height))
+                    pygame.draw.rect(self.screen, GREY, (y * self.cell_width + PADDING // 2,
+                                                         x * self.cell_height + PADDING // 2,
+                                                         self.cell_width - 1, self.cell_height - 1))
         pygame.display.update()
 
+    def draw_teleports(self):
+        """
+        Drawing teleports on map
+        :return:
+        """
+        for teleport in self.teleports:
+            pygame.draw.circle(self.screen, BLACK,
+                               (int(teleport.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                int(teleport.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 16)
+            pygame.draw.circle(self.screen, BLUE,
+                               (int(teleport.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                int(teleport.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 12)
+
+# This block of code manages game over state of game
     def game_over_events(self):
+        """
+        Control inputs in 'Game over' state of game.
+        You can play again if you press Space or left game with pressing the ESC button
+        :return:
+        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -181,17 +263,27 @@ class App:
                 self.running = False
 
     def game_over_draw(self):
+        """
+        Draws game over screen.
+        :return:
+        """
         self.screen.fill(BLACK)
-        quit_text = "Натисніть escape для ВИХОДУ"
-        again_text = "Натисніть пробіл щоб грати знову"
-        self.draw_text("ЗРАДА", self.screen, [WIDTH//2, 100],  52, RED, "Sans Serif MS", centered=True)
+        quit_text = "Press the escape button to QUIT"
+        again_text = "Press space to PLAY AGAIN"
+        self.draw_text("GAME OVER", self.screen, [WIDTH//2, 100],  52, RED, "Sans Serif MS", centered=True)
         self.draw_text(again_text, self.screen, [
                        WIDTH//2, HEIGHT//2],  36, GREY, "Sans Serif MS", centered=True)
         self.draw_text(quit_text, self.screen, [
                        WIDTH//2, HEIGHT//1.5],  36, GREY, "Sans Serif MS", centered=True)
         pygame.display.update()
 
+# This block of code manages an win state of game
     def winner_events(self):
+        """
+        Control inputs in 'WON' state of game.
+        You can play again if you press Space or left game with pressing the ESC button
+        :return:
+        """
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 temp_score = self.player.current_score
@@ -203,10 +295,30 @@ class App:
                 self.running = False
 
     def winner_draw(self):
+        """
+        Draws winner screen.
+        :return:
+        """
         self.screen.fill(BLACK)
-        self.draw_text("ЦЕ ПЕРЕМОГА!", self.screen, [
+        self.draw_text("You are WINNER!", self.screen, [
             WIDTH // 2, HEIGHT // 2 - 50], 36, GREEN, "Sans Serif MS", centered=True)
-        win_text = "Натисніть пробіл, щоб грати знову"
+        win_text = "Press space to PLAY AGAIN"
         self.draw_text(win_text, self.screen, [
             WIDTH // 2, HEIGHT // 2], 36, GREEN, "Sans Serif MS", centered=True)
         pygame.display.update()
+
+    def get_state(self) -> Statistics:
+        grid = self.grid_map
+        enemy_positions = []
+        coins_positions = []
+        walls_positions = []
+        player_position = (int(self.player.grid_pos[1]), int(self.player.grid_pos[0]))
+        for enemy in self.enemies:
+            enemy_positions.append((int(enemy.position[1]), int(enemy.position[0])))
+        for coin in self.coins:
+            coins_positions.append((int(coin[1]), int(coin[0])))
+        for wall in self.walls:
+            walls_positions.append((int(wall[1]), int(wall[0])))
+        return Statistics(grid, coins_positions, player_position, enemy_positions, walls_positions)
+
+
