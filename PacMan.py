@@ -1,10 +1,8 @@
 import random
 
 from AAlg import *
+
 vec = pygame.math.Vector2
-"""
-This is a Player class which help us to draw Hero, moving he and other useful events
-"""
 
 
 class Player:
@@ -28,14 +26,14 @@ class Player:
     def update(self):
 
         if self.able_to_move:
-            self.pix_pos += self.direction*self.speed
+            self.pix_pos += self.direction * self.speed
         if self.is_in_bounds():
             if self.stored_direction is not None:
                 self.direction = self.stored_direction
             self.able_to_move = self.is_able_to_move()
 
         new_pos = [(self.pix_pos[0] - PADDING + self.application.cell_width // 2) // self.application.cell_width + 1,
-                        (self.pix_pos[1] - PADDING + self.application.cell_height // 2) // self.application.cell_height + 1]
+                   (self.pix_pos[1] - PADDING + self.application.cell_height // 2) // self.application.cell_height + 1]
 
         if new_pos != self.grid_pos:
             self.old_grid_pos = self.grid_pos
@@ -64,6 +62,7 @@ class Player:
 
     def min_max(self):
         DEPTH = 3
+
         def maximize(game_state, depth, alpha, beta):
             if game_state.is_lose() or game_state.is_win():
                 return game_state.get_score()
@@ -144,7 +143,7 @@ class Player:
             best_score = 99999
             score = best_score
             for action in actions:
-                prob = 1.0/len(actions)
+                prob = 1.0 / len(actions)
                 if next_ghost == PLAYER:
                     if depth == DEPTH - 1:
                         score = state.simulate_state(action, ghost).get_score()
@@ -156,8 +155,8 @@ class Player:
                     score = minimize(state.simulate_state(action, ghost), depth, next_ghost)
                     score += prob * score
             return score
-        return maximize(self.application.get_state(),0)
 
+        return maximize(self.application.get_state(), 0)
 
     def minmax(self):
         curr_score = -1000
@@ -223,7 +222,8 @@ class Player:
 
     def draw(self):
         pygame.draw.circle(self.application.screen, PLAYER_COLOUR, (int(self.pix_pos.x),
-                                                                    int(self.pix_pos.y)), self.application.cell_width // 2 - 2)
+                                                                    int(self.pix_pos.y)),
+                           self.application.cell_width // 2 - 2)
 
         for x in range(self.lives):
             pygame.draw.circle(self.application.screen, GREEN, (30 + 20 * x, HEIGHT - 15), 7)
@@ -241,7 +241,6 @@ class Player:
             pygame.draw.circle(self.application.screen, (0, 255, 0),
                                (p[1] * self.application.cell_width + 10 + PADDING // 2,
                                 p[0] * self.application.cell_height + 10 + PADDING // 2), 4)
-
 
     def way_through_4_points(self):
         hero = (self.grid_pos[1], self.grid_pos[0])
@@ -287,8 +286,8 @@ class Player:
             point = random.choice(self.application.coins)
             points.append((point[1], point[0]))
         return points
+
     def on_coin(self):
-        """Check is Hero on coin"""
         if self.grid_pos in self.application.coins:
             return True
         return False
@@ -335,6 +334,6 @@ class Player:
 
     def is_able_to_move(self):
         for wall in self.application.walls:
-            if vec(self.grid_pos+self.direction) == wall:
+            if vec(self.grid_pos + self.direction) == wall:
                 return False
         return True

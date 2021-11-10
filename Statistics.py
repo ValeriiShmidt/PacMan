@@ -1,6 +1,7 @@
 import pygame
 
 from settings import *
+
 vec = pygame.math.Vector2
 
 
@@ -29,14 +30,14 @@ class Statistics:
         distances_to_all_coins = []
         if self.coins_positions:
             for coin in self.coins_positions:
-                distances_to_all_coins.append((abs(coin[0] - self.player_position[0]) + abs(coin[1] - self.player_position[1]), coin))
+                distances_to_all_coins.append(
+                    (abs(coin[0] - self.player_position[0]) + abs(coin[1] - self.player_position[1]), coin))
         else:
             return 1
         distance_to_coin, close_coin = min(distances_to_all_coins, key=lambda x: x[0])
         score = -1 / (distance_to_enemy + 0.001) + 1 / (distance_to_coin + 0.1)
         score = 3 * score if distance_to_coin < distance_to_enemy + 2 else score
         return score
-
 
     def get_legal_actions(self, mob_type):
         if mob_type == PLAYER:

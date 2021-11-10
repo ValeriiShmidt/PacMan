@@ -71,21 +71,19 @@ class GenMap:
         position = random.choice(empty_positions)
         self.grid[position] = RANDOM_GHOST
 
-
     def make_more_ways(self):
         height = self.grid.shape[0]
         width = self.grid.shape[1]
         additional_ways = (height + width) // 2
         good_walls = []
-        for i in range(1, height-1):
-            for j in range(1, width-1):
+        for i in range(1, height - 1):
+            for j in range(1, width - 1):
                 if (self.grid[i, j] == WALL and self.grid[i - 1, j] != WALL and self.grid[i + 1, j] != WALL) \
                         or (self.grid[i, j] == WALL and self.grid[i, j - 1] != WALL and self.grid[i, j + 1] != WALL):
                     good_walls.append((i, j))
         for _ in range(additional_ways):
             position = random.choice(good_walls)
             self.grid[position] = PASSAGE
-
 
     def create_labyrinth(self, rows, cols):
         self.load_maze(rows, cols)

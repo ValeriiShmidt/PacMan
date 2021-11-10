@@ -1,7 +1,7 @@
 import random
 from AAlg import *
-vec = pygame.math.Vector2
 
+vec = pygame.math.Vector2
 
 
 class Enemy:
@@ -19,14 +19,13 @@ class Enemy:
     def draw(self):
         pygame.draw.circle(self.application.screen, ICE_COLOR,
                            (self.pix_position.x, self.pix_position.y),
-                           self.application.cell_width//2-2)
+                           self.application.cell_width // 2 - 2)
         pygame.display.update()
 
     def get_pix_pos(self):
-        return vec((self.position[0]*self.application.cell_width) + PADDING // 2 + self.application.cell_width // 2,
-                   (self.position[1]*self.application.cell_height) +
+        return vec((self.position[0] * self.application.cell_width) + PADDING // 2 + self.application.cell_width // 2,
+                   (self.position[1] * self.application.cell_height) +
                    PADDING // 2 + self.application.cell_height // 2)
-
 
     def update(self):
         self.target = (int(self.application.player.grid_pos[1]), int(self.application.player.grid_pos[0]))
@@ -35,21 +34,19 @@ class Enemy:
             if self.time_to_move():
                 self.move()
 
-        self.grid_position[0] = (self.pix_position[0]-PADDING +
-                            self.application.cell_width//2)//self.application.cell_width+1
-        self.grid_position[1] = (self.pix_position[1]-PADDING +
-                            self.application.cell_height//2)//self.application.cell_height+1
-
+        self.grid_position[0] = (self.pix_position[0] - PADDING +
+                                 self.application.cell_width // 2) // self.application.cell_width + 1
+        self.grid_position[1] = (self.pix_position[1] - PADDING +
+                                 self.application.cell_height // 2) // self.application.cell_height + 1
 
     def time_to_move(self):
-        if int(self.pix_position.x+PADDING//2) % self.application.cell_width == 0:
+        if int(self.pix_position.x + PADDING // 2) % self.application.cell_width == 0:
             if self.direction == vec(1, 0) or self.direction == vec(-1, 0) or self.direction == vec(0, 0):
                 return True
-        if int(self.pix_position.y+PADDING//2) % self.application.cell_height == 0:
+        if int(self.pix_position.y + PADDING // 2) % self.application.cell_height == 0:
             if self.direction == vec(0, 1) or self.direction == vec(0, -1) or self.direction == vec(0, 0):
                 return True
         return False
-
 
     def get_random_direction(self):
         while True:
@@ -66,7 +63,6 @@ class Enemy:
             if vec(self.grid_position + random_direction) not in self.application.walls:
                 return random_direction
 
-
     def get_a_star_direction(self):
         path = AAlg(self.application.grid_map, (int(self.grid_position[1]), int(self.grid_position[0])),
                     (int(self.application.player.grid_pos[1]), int(self.application.player.grid_pos[0])),
@@ -76,20 +72,18 @@ class Enemy:
         print(direction)
         return direction
 
-
     def move(self):
         if self.personality == RANDOM:
             self.direction = self.get_random_direction()
         elif self.personality == DEFAULT:
             self.direction = self.get_a_star_direction()
 
-
     def grid_to_graph(self, grid):
         rows, cols = grid.shape
         graph = {}
-        for i in range(rows-1):
+        for i in range(rows - 1):
             cost = random.randint(1, 4)
-            for j in range(cols-1):
+            for j in range(cols - 1):
                 if grid[i, j] != 1:
                     adj = []
                     for ele in [(i - 1, j), (i + 1, j), (i, j - 1), (i, j + 1)]:
@@ -106,7 +100,7 @@ class Enemy:
                                                              self.application.cell_height - 5))
 
     def load_grid(self):
-        grid = np.zeros((ROWS+1, COLS), dtype=int)
+        grid = np.zeros((ROWS + 1, COLS), dtype=int)
         with open("Map.txt", "r") as file:
             for y, line in enumerate(file):
                 for x, char in enumerate(line[:-1]):
@@ -122,5 +116,3 @@ class Enemy:
             return False
         else:
             return True
-
-

@@ -3,6 +3,7 @@ from Enemy import *
 from GenMap import *
 from Statistics import *
 import time
+
 pygame.init()
 
 vec = pygame.math.Vector2
@@ -15,8 +16,8 @@ class App:
         self.clock = pygame.time.Clock()
         self.running = True
         self.state = MENU
-        self.cell_width = MAZE_WIDTH//COLS
-        self.cell_height = MAZE_HEIGHT//ROWS
+        self.cell_width = MAZE_WIDTH // COLS
+        self.cell_height = MAZE_HEIGHT // ROWS
         self.walls = []
         self.coins = []
         self.teleports = []
@@ -66,8 +67,8 @@ class App:
         text = font.render(words, False, colour)
         text_size = text.get_size()
         if centered:
-            pos[0] = pos[0]-text_size[0]//2
-            pos[1] = pos[1]-text_size[1]//2
+            pos[0] = pos[0] - text_size[0] // 2
+            pos[1] = pos[1] - text_size[1] // 2
         screen.blit(text, pos)
 
     def load_map(self):
@@ -85,15 +86,14 @@ class App:
                 elif self.grid_map[y_index, x_index] == RANDOM_GHOST:
                     self.enemies.append(Enemy(self, vec(x_index, y_index), RANDOM))
 
-
     def draw_grid(self):
 
-        for x in range(WIDTH//self.cell_width):
-            pygame.draw.line(self.background, GREY, (x*self.cell_width, 0),
-                             (x*self.cell_width, HEIGHT))
-        for x in range(HEIGHT//self.cell_height):
-            pygame.draw.line(self.background, GREY, (0, x*self.cell_height),
-                             (WIDTH, x*self.cell_height))
+        for x in range(WIDTH // self.cell_width):
+            pygame.draw.line(self.background, GREY, (x * self.cell_width, 0),
+                             (x * self.cell_width, HEIGHT))
+        for x in range(HEIGHT // self.cell_height):
+            pygame.draw.line(self.background, GREY, (0, x * self.cell_height),
+                             (WIDTH, x * self.cell_height))
 
     def reset(self):
         self.walls = []
@@ -118,9 +118,9 @@ class App:
     def start_draw(self):
         self.screen.fill(BLACK)
         self.draw_text('Pacman', self.screen, [
-                       WIDTH//2, HEIGHT//2-50], START_TEXT_SIZE, RED, START_FONT, centered=True)
+            WIDTH // 2, HEIGHT // 2 - 50], START_TEXT_SIZE, RED, START_FONT, centered=True)
         self.draw_text('Press space to play', self.screen, [
-                       WIDTH//2, HEIGHT//2], START_TEXT_SIZE, RED, START_FONT, centered=True)
+            WIDTH // 2, HEIGHT // 2], START_TEXT_SIZE, RED, START_FONT, centered=True)
         self.draw_text(f'HIGH SCORE {self.high_score}', self.screen, [4, 0],
                        START_TEXT_SIZE, WHITE, START_FONT)
         pygame.display.update()
@@ -155,7 +155,7 @@ class App:
         self.draw_walls()
         self.draw_text(f'CURRENT SCORE: {self.player.current_score}',
                        self.screen, [60, 0], 36, WHITE, START_FONT)
-        self.draw_text(f'HIGH SCORE: {self.high_score}', self.screen, [WIDTH//2+60, 0], 36, WHITE, START_FONT)
+        self.draw_text(f'HIGH SCORE: {self.high_score}', self.screen, [WIDTH // 2 + 60, 0], 36, WHITE, START_FONT)
         self.player.draw()
         for enemy in self.enemies:
             enemy.update()
@@ -183,10 +183,11 @@ class App:
 
     def draw_coins(self):
         for coin in self.coins:
-            if self.player.target_coin is not None and coin[1] == self.player.target_coin[0] and coin[0] == self.player.target_coin[1]:
+            if self.player.target_coin is not None and coin[1] == self.player.target_coin[0] and coin[0] == \
+                    self.player.target_coin[1]:
                 pygame.draw.circle(self.screen, RED,
-                                   (int(coin.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
-                                    int(coin.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 5)
+                                   (int(coin.x * self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                    int(coin.y * self.cell_height) + self.cell_height // 2 + PADDING // 2), 5)
             else:
 
                 pygame.draw.circle(self.screen, YELLOW,
@@ -208,11 +209,11 @@ class App:
     def draw_teleports(self):
         for teleport in self.teleports:
             pygame.draw.circle(self.screen, BLACK,
-                               (int(teleport.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
-                                int(teleport.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 16)
+                               (int(teleport.x * self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                int(teleport.y * self.cell_height) + self.cell_height // 2 + PADDING // 2), 16)
             pygame.draw.circle(self.screen, BLUE,
-                               (int(teleport.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
-                                int(teleport.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 12)
+                               (int(teleport.x * self.cell_width) + self.cell_width // 2 + PADDING // 2,
+                                int(teleport.y * self.cell_height) + self.cell_height // 2 + PADDING // 2), 12)
 
     def game_over_events(self):
         for event in pygame.event.get():
@@ -227,13 +228,12 @@ class App:
         self.screen.fill(BLACK)
         quit_text = "Press the escape button to QUIT"
         again_text = "Press space to PLAY AGAIN"
-        self.draw_text("GAME OVER", self.screen, [WIDTH//2, 100],  52, RED, "Sans Serif MS", centered=True)
+        self.draw_text("GAME OVER", self.screen, [WIDTH // 2, 100], 52, RED, "Sans Serif MS", centered=True)
         self.draw_text(again_text, self.screen, [
-                       WIDTH//2, HEIGHT//2],  36, GREY, "Sans Serif MS", centered=True)
+            WIDTH // 2, HEIGHT // 2], 36, GREY, "Sans Serif MS", centered=True)
         self.draw_text(quit_text, self.screen, [
-                       WIDTH//2, HEIGHT//1.5],  36, GREY, "Sans Serif MS", centered=True)
+            WIDTH // 2, HEIGHT // 1.5], 36, GREY, "Sans Serif MS", centered=True)
         pygame.display.update()
-
 
     def winner_events(self):
         for event in pygame.event.get():
@@ -268,5 +268,3 @@ class App:
         for wall in self.walls:
             walls_positions.append((int(wall[1]), int(wall[0])))
         return Statistics(grid, coins_positions, player_position, enemy_positions, walls_positions)
-
-
