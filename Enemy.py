@@ -69,7 +69,6 @@ class Enemy:
                     euclid, 0)
         next_step = (path[1][1], path[1][0])
         direction = vec(int(next_step[0] - self.grid_position[0]), int(next_step[1] - self.grid_position[1]))
-        print(direction)
         return direction
 
     def move(self):
