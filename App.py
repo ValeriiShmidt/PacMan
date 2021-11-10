@@ -2,6 +2,7 @@ from PacMan import *
 from Enemy import *
 from GenMap import *
 from Statistics import *
+import time
 pygame.init()
 
 vec = pygame.math.Vector2
@@ -108,10 +109,6 @@ class App:
         self.state = GAMING
 
     def start_events(self):
-        """
-        Method control the inputs. Press SCAPE to start play. ESC for exit
-        :return:
-        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -119,10 +116,6 @@ class App:
                 self.state = GAMING
 
     def start_draw(self):
-        """
-        Drawing the main menu.
-        :return:
-        """
         self.screen.fill(BLACK)
         self.draw_text('Pacman', self.screen, [
                        WIDTH//2, HEIGHT//2-50], START_TEXT_SIZE, RED, START_FONT, centered=True)
@@ -132,13 +125,7 @@ class App:
                        START_TEXT_SIZE, WHITE, START_FONT)
         pygame.display.update()
 
-# This is the main block of code controls game process and gameplay
-
     def playing_events(self):
-        """
-        This method allows you to control in game player.
-        :return:
-        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -153,10 +140,6 @@ class App:
                     self.player.change_direction(vec(0, 1))
 
     def playing_update(self):
-        """
-        Updating the player and check is he winner. If he is game turn to winner state.
-        :return:
-        """
         if len(self.coins) == 0:
             play_time = time.time() - self.start_time
             with open("results.csv", "a") as file:
@@ -166,10 +149,6 @@ class App:
         self.player.update()
 
     def playing_draw(self):
-        """
-        This method draw main game scenes and update it.
-        :return:
-        """
         self.screen.fill(BLACK)
         self.screen.blit(self.background, (PADDING // 2, PADDING // 2))
         self.draw_coins()
@@ -184,10 +163,6 @@ class App:
         pygame.display.update()
 
     def remove_life(self):
-        """
-        This method control Player's lives and control moment of lose.
-        :return:
-        """
         self.player.lives -= 1
 
         if self.player.lives == 0:
@@ -207,10 +182,6 @@ class App:
                 enemy.pix_pos = enemy.get_pix_pos()
 
     def draw_coins(self):
-        """
-        Simple draw coins method.
-        :return:
-        """
         for coin in self.coins:
             if self.player.target_coin is not None and coin[1] == self.player.target_coin[0] and coin[0] == self.player.target_coin[1]:
                 pygame.draw.circle(self.screen, RED,
@@ -235,10 +206,6 @@ class App:
         pygame.display.update()
 
     def draw_teleports(self):
-        """
-        Drawing teleports on map
-        :return:
-        """
         for teleport in self.teleports:
             pygame.draw.circle(self.screen, BLACK,
                                (int(teleport.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
@@ -247,13 +214,7 @@ class App:
                                (int(teleport.x*self.cell_width) + self.cell_width // 2 + PADDING // 2,
                                 int(teleport.y*self.cell_height) + self.cell_height // 2 + PADDING // 2), 12)
 
-# This block of code manages game over state of game
     def game_over_events(self):
-        """
-        Control inputs in 'Game over' state of game.
-        You can play again if you press Space or left game with pressing the ESC button
-        :return:
-        """
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -263,10 +224,6 @@ class App:
                 self.running = False
 
     def game_over_draw(self):
-        """
-        Draws game over screen.
-        :return:
-        """
         self.screen.fill(BLACK)
         quit_text = "Press the escape button to QUIT"
         again_text = "Press space to PLAY AGAIN"
@@ -277,13 +234,8 @@ class App:
                        WIDTH//2, HEIGHT//1.5],  36, GREY, "Sans Serif MS", centered=True)
         pygame.display.update()
 
-# This block of code manages an win state of game
+
     def winner_events(self):
-        """
-        Control inputs in 'WON' state of game.
-        You can play again if you press Space or left game with pressing the ESC button
-        :return:
-        """
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 temp_score = self.player.current_score
@@ -295,10 +247,6 @@ class App:
                 self.running = False
 
     def winner_draw(self):
-        """
-        Draws winner screen.
-        :return:
-        """
         self.screen.fill(BLACK)
         self.draw_text("You are WINNER!", self.screen, [
             WIDTH // 2, HEIGHT // 2 - 50], 36, GREEN, "Sans Serif MS", centered=True)

@@ -22,7 +22,6 @@ class Statistics:
         return len(self.coins_positions) == 0
 
     def get_score(self):
-        # return sum([x[0] - self.player_position[0] + x[1] - self.player_position[1] for x in self.enemies_positions])
         distances_to_enemy = []
         for enemy in self.enemies_positions:
             distances_to_enemy.append(abs(enemy[0] - self.player_position[0]) + abs(enemy[1] - self.player_position[1]))

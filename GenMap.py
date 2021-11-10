@@ -1,7 +1,4 @@
-import sys
-
 import numpy as np
-import pygame
 from settings import *
 import random
 
@@ -66,15 +63,6 @@ class GenMap:
         water_block_amount = empty_positions_amount // 8
         coins_amount = COINS_AMOUNT
         empty_positions = self.get_empty_blocks_positions()
-        # for _ in range(ice_block_amount):
-        #     position = random.choice(empty_positions)
-        #     self.grid[position] = ICE
-        # for _ in range(swamp_block_amount):
-        #     position = random.choice(empty_positions)
-        #     self.grid[position] = SWAMP
-        # for _ in range(water_block_amount):
-        #     position = random.choice(empty_positions)
-        #     self.grid[position] = WATER
         for _ in range(coins_amount):
             position = random.choice(empty_positions)
             self.grid[position] = COIN

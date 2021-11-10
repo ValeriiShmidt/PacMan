@@ -1,8 +1,5 @@
 import random
 
-import numpy as np
-import pygame
-from settings import *
 from AAlg import *
 vec = pygame.math.Vector2
 """
@@ -29,11 +26,6 @@ class Player:
         self.algo = MINMAX
 
     def update(self):
-        """
-        This is a main function to update the Hero. There is a check of eating the coin,
-        death from Ghost and some magic with Teleports
-        :return:
-        """
 
         if self.able_to_move:
             self.pix_pos += self.direction*self.speed
@@ -48,9 +40,6 @@ class Player:
         if new_pos != self.grid_pos:
             self.old_grid_pos = self.grid_pos
             self.grid_pos = new_pos
-
-            # self.path = a_star(self.application.grid_map, start, end, take_all_coins_heuristic, self.application.coins)
-            # self.path, self.c = self.way_through_all_points()
 
         if self.on_coin():
             self.eat_coin()
@@ -233,10 +222,6 @@ class Player:
         return -1
 
     def draw(self):
-        """
-        Draw the Hero
-        :return:
-        """
         pygame.draw.circle(self.application.screen, PLAYER_COLOUR, (int(self.pix_pos.x),
                                                                     int(self.pix_pos.y)), self.application.cell_width // 2 - 2)
 
@@ -309,18 +294,10 @@ class Player:
         return False
 
     def eat_coin(self):
-        """
-        Eating the coin
-        :return:
-        """
         self.application.coins.remove(self.grid_pos)
         self.current_score += 1
 
     def on_teleport(self):
-        """
-        This method allow Hero to use Teleport
-        :return:
-        """
         if self.grid_pos in self.application.teleports:
             if self.grid_pos == self.application.teleports[0]:
                 self.grid_pos = self.application.teleports[1] + vec((-1, 0))
@@ -336,41 +313,19 @@ class Player:
                 self.pix_pos = self.get_pix_pos()
 
     def on_enemy(self):
-        """
-        Check is Hero on Enemy...
-        Should I move this method to Enemy class
-        :return:
-        """
         for enemy in self.application.enemies:
             if enemy.position == self.grid_pos:
                 return True
 
     def change_direction(self, direction):
-        """
-
-        :param direction: Vector(int, int) - direction to move.
-        Description: (1,0) - East
-                     (-1,0) - West
-                     (0, 1) - South
-                     (0,-1) - North
-        :return:
-        """
         self.stored_direction = direction
 
     def get_pix_pos(self):
-        """
-        Using grid position to calculate a pixel position on game screen
-        :return: vec(x_pixel_position, y_pixel_position)
-        """
         return vec((self.grid_pos[0] * self.application.cell_width) + PADDING // 2 + self.application.cell_width // 2,
                    (self.grid_pos[1] * self.application.cell_height) +
                    PADDING // 2 + self.application.cell_height // 2)
 
     def is_in_bounds(self):
-        """
-        Checking is Hero inside a cell to avoid Hero clipping in textures
-        :return:
-        """
         if int(self.pix_pos.x + PADDING // 2) % self.application.cell_width == 0:
             if self.direction == vec(1, 0) or self.direction == vec(-1, 0) or self.direction == vec(0, 0):
                 return True
@@ -379,10 +334,6 @@ class Player:
                 return True
 
     def is_able_to_move(self):
-        """
-        Checking next cell considering direction
-        :return:
-        """
         for wall in self.application.walls:
             if vec(self.grid_pos+self.direction) == wall:
                 return False

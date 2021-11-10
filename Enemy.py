@@ -1,8 +1,7 @@
 import random
-import time
 from AAlg import *
 vec = pygame.math.Vector2
-import queue
+
 
 
 class Enemy:

@@ -1,20 +1,11 @@
-"""
-This file is intended for constants
- in game as size of window,
- colors of ghost or player and etc.
-"""
 ROWS = 31
 COLS = 28
 PADDING = 50
-# Screen constants
 WIDTH, HEIGHT = COLS * 20 + PADDING, ROWS * 20 + PADDING
 FPS = 60
 
 MAZE_WIDTH, MAZE_HEIGHT = WIDTH - PADDING, HEIGHT - PADDING
 
-
-
-# Colour constants
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 GREY = (187, 187, 187)
