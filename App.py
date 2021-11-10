@@ -200,7 +200,7 @@ class App:
         for x in range(h):
             for y in range(w):
                 if maze[x, y] == WALL:
-                    pygame.draw.rect(self.screen, GREY, (y * self.cell_width + PADDING // 2,
+                    pygame.draw.rect(self.screen, BLUE, (y * self.cell_width + PADDING // 2,
                                                          x * self.cell_height + PADDING // 2,
                                                          self.cell_width - 1, self.cell_height - 1))
         pygame.display.update()
