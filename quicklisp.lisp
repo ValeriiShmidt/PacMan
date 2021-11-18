@@ -1002,6 +1002,7 @@
       (add-line "Host: " host (if (= port 80) ""
                                   (format nil ":~D" port)))
       (add-line "Connection: close")
+      ;; FIXME: get this version string from somewhere else.
       (add-line "User-Agent: quicklisp-bootstrap/"
                 qlqs-info:*version*)
       (add-newline sink)
